@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skladačka elektrického obvodu · Fyzika 8. ročník ZŠ</title>
+  <meta name="description" content="Vzdelávacia puzzle hra z fyziky pre 8. ročník ZŠ na skladanie elektrických obvodov z jednotlivých súčiastok." />
+  <meta property="og:title" content="Skladačka elektrického obvodu" />
+  <meta property="og:description" content="Vzdelávacia puzzle hra z fyziky pre 8. ročník ZŠ na skladanie elektrických obvodov z jednotlivých súčiastok." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700&family=Caveat:wght@600&family=Nunito:wght@600;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #FFF6EC;
+      --pink: #FFC8DD;
+      --blue: #BDE0FE;
+      --mint: #B9FBC0;
+      --yellow: #FFF1A8;
+      --lilac: #D7C6F5;
+      --peach: #FFD6A5;
+      --text: #4A4458;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #F4E9DC;
+      font-family: 'Nunito', sans-serif;
+      color: var(--text);
+    }
+
+    #viewport {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #stage {
+      width: 1890px;
+      height: 1063px;
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+      transform-origin: center center;
+      box-shadow: 0 24px 64px rgba(74, 68, 88, 0.16);
+      border-radius: 28px;
+      flex-shrink: 0;
+    }
+
+    /* Soft pastel ambient background shapes */
+    .bg-blob {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.45;
+    }
+    .bg-blob-1 {
+      width: 520px;
+      height: 520px;
+      background: var(--blue);
+      top: -180px;
+      left: -140px;
+      opacity: 0.28;
+    }
+    .bg-blob-2 {
+      width: 440px;
+      height: 440px;
+      background: var(--yellow);
+      bottom: -170px;
+      left: 340px;
+      opacity: 0.35;
+    }
+    .bg-blob-3 {
+      width: 480px;
+      height: 480px;
+      background: var(--pink);
+      top: -150px;
+      right: -130px;
+      opacity: 0.25;
+    }
+    .bg-blob-4 {
+      width: 420px;
+      height: 420px;
+      background: var(--lilac);
+      bottom: -180px;
+      right: 120px;
+      opacity: 0.25;
+    }
+
+    h1, h2, h3, .font-heading {
+      font-family: 'Baloo 2', sans-serif;
+      font-weight: 700;
+      margin: 0;
+      line-height: 1.15;
+    }
+
+    /* Sound button in top-right corner */
+    #btn-sound {
+      position: absolute;
+      top: 22px;
+      right: 26px;
+      width: 82px;
+      height: 82px;
+      border-radius: 24px;
+      border: 3px solid rgba(74, 68, 88, 0.15);
+      background: #FFFFFF;
+      box-shadow: 0 8px 20px rgba(74, 68, 88, 0.1);
+      font-size: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 80;
+      transition: transform 0.15s ease, background-color 0.2s ease, box-shadow 0.15s ease;
+    }
+    #btn-sound:hover {
+      transform: translateY(-2px) scale(1.04);
+      background: var(--yellow);
+    }
+    #btn-sound:active {
+      transform: scale(0.96);
+    }
+
+    /* Signature mark in bottom-right of every screen */
+    .signature-badge {
+      position: absolute;
+      bottom: 16px;
+      right: 24px;
+      z-index: 80;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1.5px solid rgba(74, 68, 88, 0.12);
+      box-shadow: 0 4px 12px rgba(74, 68, 88, 0.06);
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      color: rgba(74, 68, 88, 0.72);
+      pointer-events: none;
+    }
+
+    /* Screen visibility */
+    .screen {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      display: none;
+      flex-direction: column;
+    }
+    .screen.active {
+      display: flex;
+    }
+
+    /* ================= START SCREEN ================= */
+    #screen-start {
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .start-card {
+      width: 1180px;
+      background: #FFFFFF;
+      border-radius: 40px;
+      border: 5px solid var(--blue);
+      box-shadow: 0 22px 54px rgba(74, 68, 88, 0.11);
+      padding: 52px 68px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 24px;
+      position: relative;
+    }
+
+    .subject-kicker {
+      font-size: 23px;
+      font-weight: 800;
+      color: #6E6580;
+      letter-spacing: 0.02em;
+    }
+
+    .start-title {
+      font-size: 68px;
+      color: var(--text);
+    }
+
+    .start-illustration {
+      width: 680px;
+      height: 250px;
+      background: var(--bg);
+      border-radius: 32px;
+      border: 3px dashed var(--lilac);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+    }
+
+    .start-desc {
+      font-size: 27px;
+      font-weight: 600;
+      line-height: 1.48;
+      max-width: 940px;
+      margin: 0;
+      color: var(--text);
+    }
+
+    .btn-primary {
+      min-width: 340px;
+      min-height: 92px;
+      padding: 20px 48px;
+      border-radius: 28px;
+      border: 4px solid #7BD389;
+      background: var(--mint);
+      color: var(--text);
+      font-family: 'Baloo 2', sans-serif;
+      font-weight: 700;
+      font-size: 38px;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(74, 68, 88, 0.12);
+      transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 30px rgba(74, 68, 88, 0.16);
+      filter: brightness(1.03);
+    }
+    .btn-primary:active {
+      transform: translateY(1px);
+    }
+
+    .btn-blue {
+      background: var(--blue);
+      border-color: #82BDF2;
+    }
+
+    /* ================= GAMEPLAY SCREEN ================= */
+    #screen-game {
+      padding: 22px 34px 48px 34px;
+      gap: 18px;
+    }
+
+    .game-header {
+      height: 84px;
+      padding-right: 102px; /* space for mute button */
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: baseline;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .header-game-title {
+      font-family: 'Baloo 2', sans-serif;
+      font-weight: 700;
+      font-size: 32px;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .header-round-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #6B627D;
+      white-space: nowrap;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      flex-shrink: 0;
+    }
+
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #FFFFFF;
+      padding: 12px 22px;
+      border-radius: 24px;
+      border: 3px solid var(--blue);
+      box-shadow: 0 6px 16px rgba(74, 68, 88, 0.06);
+    }
+
+    .progress-label {
+      font-size: 22px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .progress-dots {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .p-dot {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #EDE7F6;
+      border: 2px solid rgba(74, 68, 88, 0.16);
+      transition: transform 0.2s ease, background-color 0.25s ease;
+    }
+    .p-dot.done {
+      background: var(--mint);
+      border-color: #6CC97B;
+    }
+    .p-dot.current {
+      background: var(--yellow);
+      border-color: #E0C24D;
+      transform: scale(1.22);
+    }
+
+    .score-box {
+      background: #FFFFFF;
+      padding: 12px 24px;
+      border-radius: 24px;
+      border: 3px solid var(--lilac);
+      box-shadow: 0 6px 16px rgba(74, 68, 88, 0.06);
+      font-size: 22px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .game-body {
+      flex: 1;
+      display: flex;
+      gap: 28px;
+      min-height: 0;
+    }
+
+    /* Left column: Prompt + Circuit Board + Feedback */
+    .board-column {
+      width: 1164px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .task-banner {
+      background: var(--yellow);
+      border: 3px solid #EBD46D;
+      border-radius: 24px;
+      padding: 16px 28px;
+      font-size: 25px;
+      font-weight: 800;
+      line-height: 1.3;
+      box-shadow: 0 8px 20px rgba(74, 68, 88, 0.07);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .circuit-board {
+      flex: 1;
+      background: #FFFFFF;
+      border-radius: 32px;
+      border: 4px solid var(--blue);
+      box-shadow: 0 14px 36px rgba(74, 68, 88, 0.08);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .circuit-canvas-wrap {
+      width: 1100px;
+      height: 620px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .circuit-svg-layer {
+      position: absolute;
+      inset: 0;
+      width: 1100px;
+      height: 620px;
+      pointer-events: none;
+    }
+
+    /* Circuit Puzzle Slots */
+    .circuit-slot {
+      position: absolute;
+      width: 236px;
+      height: 146px;
+      transform: translate(-50%, -50%);
+      border-radius: 24px;
+      border: 4px dashed #A89BC2;
+      background: rgba(255, 246, 236, 0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.16s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      z-index: 5;
+    }
+
+    .circuit-slot.empty:hover,
+    .circuit-slot.slot-hover {
+      background: var(--blue);
+      border-style: solid;
+      border-color: #6CAEEB;
+      transform: translate(-50%, -50%) scale(1.04);
+      box-shadow: 0 10px 24px rgba(108, 174, 235, 0.28);
+    }
+
+    .circuit-slot.slot-ready {
+      border-color: #9A82CF;
+      background: rgba(215, 198, 245, 0.35);
+      animation: gentlePulse 1.4s infinite ease-in-out;
+    }
+
+    .circuit-slot.slot-selected-target {
+      border-style: solid;
+      border-color: #8D74C7;
+      background: var(--lilac);
+      box-shadow: 0 0 0 6px rgba(215, 198, 245, 0.45);
+    }
+
+    .circuit-slot.slot-wrong {
+      background: var(--pink);
+      border-style: solid;
+      border-color: #E79AB8;
+      animation: gentleShake 0.42s ease;
+    }
+
+    .circuit-slot.slot-filled {
+      background: var(--mint);
+      border: 4px solid #6ECE7D;
+      cursor: default;
+      box-shadow: 0 8px 20px rgba(110, 206, 125, 0.25);
+      padding: 8px 10px;
+    }
+
+    .circuit-slot.slot-active-power {
+      background: #E8FDE9;
+      border-color: #5AC46B;
+      box-shadow: 0 0 28px rgba(185, 251, 192, 0.95);
+    }
+
+    .slot-hint-num {
+      font-size: 16px;
+      font-weight: 800;
+      color: #7D7491;
+      margin-bottom: 4px;
+    }
+
+    .slot-hint-role {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.22;
+    }
+
+    .slot-filled-svg {
+      width: 150px;
+      height: 82px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .slot-filled-name {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.15;
+      margin-top: 2px;
+    }
+
+    /* Bottom Feedback & Next Row */
+    .feedback-row {
+      height: 92px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .feedback-banner {
+      flex: 1;
+      height: 92px;
+      border-radius: 24px;
+      background: #FFFFFF;
+      border: 3px solid var(--blue);
+      padding: 12px 26px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.3;
+      box-shadow: 0 8px 20px rgba(74, 68, 88, 0.06);
+      transition: background-color 0.25s ease, border-color 0.25s ease;
+    }
+
+    .feedback-banner.is-correct {
+      background: var(--mint);
+      border-color: #6ECE7D;
+    }
+    .feedback-banner.is-wrong {
+      background: var(--peach);
+      border-color: #EBB06D;
+    }
+    .feedback-banner.is-complete {
+      background: var(--yellow);
+      border-color: #E5C95A;
+    }
+
+    .feedback-icon {
+      font-size: 36px;
+      flex-shrink: 0;
+    }
+
+    .btn-next {
+      min-width: 240px;
+      height: 92px;
+      padding: 0 32px;
+      border-radius: 26px;
+      border: 4px solid #7BD389;
+      background: var(--mint);
+      color: var(--text);
+      font-family: 'Baloo 2', sans-serif;
+      font-weight: 700;
+      font-size: 32px;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(74, 68, 88, 0.12);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
+      flex-shrink: 0;
+    }
+    .btn-next.visible {
+      display: inline-flex;
+      animation: popIn 0.28s ease;
+    }
+    .btn-next:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 28px rgba(74, 68, 88, 0.16);
+    }
+
+    /* Right column: Component Tray */
+    .tray-column {
+      width: 630px;
+      background: #FFFFFF;
+      border-radius: 32px;
+      border: 4px solid var(--lilac);
+      box-shadow: 0 14px 36px rgba(74, 68, 88, 0.08);
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .tray-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .tray-title {
+      font-size: 32px;
+      color: var(--text);
+    }
+
+    .tray-sub {
+      font-size: 19px;
+      font-weight: 700;
+      color: #776E8A;
+    }
+
+    .parts-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      align-content: start;
+    }
+
+    .part-card {
+      height: 224px;
+      background: var(--bg);
+      border-radius: 26px;
+      border: 3px solid rgba(74, 68, 88, 0.14);
+      padding: 14px 14px 12px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+      cursor: grab;
+      position: relative;
+      touch-action: none;
+      box-shadow: 0 6px 16px rgba(74, 68, 88, 0.06);
+      transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background-color 0.2s ease, opacity 0.2s ease;
+    }
+
+    .part-card:hover:not(.used):not(.eliminated) {
+      transform: translateY(-4px);
+      border-color: #82BDF2;
+      background: #F4F9FF;
+      box-shadow: 0 12px 24px rgba(74, 68, 88, 0.12);
+    }
+
+    .part-card.selected {
+      background: var(--lilac);
+      border-color: #8D74C7;
+      border-width: 4px;
+      transform: translateY(-4px);
+      box-shadow: 0 12px 26px rgba(141, 116, 199, 0.28);
+    }
+
+    .part-card.used {
+      background: #EFFBF0;
+      border-color: #9EE2A8;
+      opacity: 0.58;
+      cursor: default;
+      transform: none;
+    }
+
+    .part-card.eliminated {
+      background: #FFF0F3;
+      border-color: var(--pink);
+      opacity: 0.62;
+    }
+
+    .part-card.wrong-flash {
+      background: var(--pink);
+      border-color: #E79AB8;
+      animation: cardShake 0.42s ease;
+    }
+
+    .part-symbol-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 58px;
+      height: 38px;
+      border-radius: 12px;
+      background: #FFFFFF;
+      border: 2px solid rgba(74, 68, 88, 0.14);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .part-svg-box {
+      width: 170px;
+      height: 118px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .part-name {
+      font-size: 21px;
+      font-weight: 800;
+      line-height: 1.18;
+      color: var(--text);
+      pointer-events: none;
+    }
+
+    .part-status-note {
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      font-size: 15px;
+      font-weight: 800;
+      color: #468D52;
+      pointer-events: none;
+    }
+
+    /* Floating Drag Ghost inside #stage */
+    .drag-ghost {
+      position: absolute;
+      width: 268px;
+      height: 210px;
+      background: #FFFFFF;
+      border-radius: 26px;
+      border: 4px solid #75B5EE;
+      box-shadow: 0 18px 40px rgba(74, 68, 88, 0.24);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      text-align: center;
+      pointer-events: none;
+      z-index: 120;
+      transform: translate(-50%, -50%) scale(1.05);
+    }
+
+    /* ================= END SCREEN ================= */
+    #screen-end {
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .end-card {
+      width: 1120px;
+      background: #FFFFFF;
+      border-radius: 40px;
+      border: 5px solid var(--mint);
+      box-shadow: 0 22px 54px rgba(74, 68, 88, 0.12);
+      padding: 52px 64px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 26px;
+    }
+
+    .end-title {
+      font-size: 64px;
+      color: var(--text);
+    }
+
+    .end-stats-row {
+      display: flex;
+      gap: 24px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .end-stat {
+      flex: 1;
+      max-width: 290px;
+      border-radius: 28px;
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border: 3px solid rgba(74, 68, 88, 0.12);
+    }
+    .end-stat.stat-1 { background: var(--mint); }
+    .end-stat.stat-2 { background: var(--yellow); }
+    .end-stat.stat-3 { background: var(--blue); }
+
+    .end-stat-value {
+      font-family: 'Baloo 2', sans-serif;
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .end-stat-label {
+      font-size: 21px;
+      font-weight: 800;
+    }
+
+    .end-message {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.4;
+      max-width: 860px;
+      margin: 0;
+    }
+
+    /* ================= ANIMATIONS ================= */
+    @keyframes gentlePulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.03); }
+    }
+
+    @keyframes gentleShake {
+      0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+      25% { transform: translate(-50%, -50%) translateX(-10px); }
+      50% { transform: translate(-50%, -50%) translateX(10px); }
+      75% { transform: translate(-50%, -50%) translateX(-6px); }
+    }
+
+    @keyframes cardShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      50% { transform: translateX(8px); }
+      75% { transform: translateX(-5px); }
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.86); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes spinFan {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .spin-fan {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: spinFan 0.65s linear infinite;
+    }
+
+    @keyframes flowCurrent {
+      from { stroke-dashoffset: 48; }
+      to { stroke-dashoffset: 0; }
+    }
+    .wire-current-flow {
+      stroke-dasharray: 12 12;
+      animation: flowCurrent 0.75s linear infinite;
+    }
+
+    @keyframes bellPulse {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-7deg); }
+      75% { transform: rotate(7deg); }
+    }
+    .bell-ringing {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: bellPulse 0.28s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body>
+  <div id="viewport">
+    <div id="stage">
+      <!-- Ambient soft pastel background shapes -->
+      <div class="bg-blob bg-blob-1"></div>
+      <div class="bg-blob bg-blob-2"></div>
+      <div class="bg-blob bg-blob-3"></div>
+      <div class="bg-blob bg-blob-4"></div>
+
+      <!-- Top-right mute/unmute button -->
+      <button id="btn-sound" type="button" aria-label="Zapnúť alebo vypnúť zvuk" title="Zvuk">🔊</button>
+
+      <!-- ================= START SCREEN ================= -->
+      <section id="screen-start" class="screen active">
+        <div class="start-card">
+          <div class="subject-kicker">Fyzika · 8. ročník ZŠ · Elektrický obvod</div>
+          <h1 class="start-title">Skladačka elektrického obvodu</h1>
+
+          <div class="start-illustration" aria-hidden="true">
+            <svg viewBox="0 0 640 210" width="100%" height="100%">
+              <!-- Decorative circuit loop -->
+              <rect x="68" y="34" width="504" height="142" rx="34" fill="none" stroke="#BDE0FE" stroke-width="10" />
+              <rect x="68" y="34" width="504" height="142" rx="34" fill="none" stroke="#FFF1A8" stroke-width="5" stroke-dasharray="14 14" />
+              <!-- Battery puzzle card -->
+              <g transform="translate(34, 65)">
+                <rect x="0" y="0" width="90" height="80" rx="18" fill="#BDE0FE" stroke="#4A4458" stroke-width="3" />
+                <rect x="18" y="24" width="54" height="38" rx="8" fill="#FFF1A8" stroke="#4A4458" stroke-width="2.5" />
+                <rect x="26" y="15" width="12" height="9" rx="2" fill="#FFD6A5" stroke="#4A4458" stroke-width="2" />
+                <rect x="52" y="15" width="12" height="9" rx="2" fill="#FFD6A5" stroke="#4A4458" stroke-width="2" />
+                <text x="32" y="49" font-family="Nunito" font-size="16" font-weight="800" fill="#4A4458">+</text>
+                <text x="53" y="49" font-family="Nunito" font-size="16" font-weight="800" fill="#4A4458">−</text>
+              </g>
+              <!-- Smiling Glowing Bulb in Center -->
+              <g transform="translate(262, 16)">
+                <circle cx="58" cy="64" r="56" fill="#FFF1A8" opacity="0.65" />
+                <line x1="58" y1="0" x2="58" y2="14" stroke="#E6B800" stroke-width="4" stroke-linecap="round" />
+                <line x1="12" y1="22" x2="22" y2="31" stroke="#E6B800" stroke-width="4" stroke-linecap="round" />
+                <line x1="104" y1="22" x2="94" y2="31" stroke="#E6B800" stroke-width="4" stroke-linecap="round" />
+                <circle cx="58" cy="64" r="34" fill="#FFF1A8" stroke="#4A4458" stroke-width="3.5" />
+                <path d="M44 90 L72 90 L69 108 L47 108 Z" fill="#D7C6F5" stroke="#4A4458" stroke-width="3" />
+                <circle cx="48" cy="59" r="3.5" fill="#4A4458" />
+                <circle cx="68" cy="59" r="3.5" fill="#4A4458" />
+                <path d="M48 70 Q58 80 68 70" fill="none" stroke="#4A4458" stroke-width="3" stroke-linecap="round" />
+              </g>
+              <!-- Switch card -->
+              <g transform="translate(268, 136)">
+                <rect x="0" y="0" width="104" height="58" rx="16" fill="#B9FBC0" stroke="#4A4458" stroke-width="3" />
+                <circle cx="28" cy="34" r="6" fill="#4A4458" />
+                <circle cx="76" cy="34" r="6" fill="#4A4458" />
+                <line x1="28" y1="34" x2="76" y2="34" stroke="#4A4458" stroke-width="4" stroke-linecap="round" />
+              </g>
+              <!-- Ammeter card -->
+              <g transform="translate(516, 65)">
+                <rect x="0" y="0" width="90" height="80" rx="18" fill="#FFC8DD" stroke="#4A4458" stroke-width="3" />
+                <circle cx="45" cy="40" r="24" fill="#FFFFFF" stroke="#4A4458" stroke-width="2.5" />
+                <text x="45" y="48" text-anchor="middle" font-family="Baloo 2" font-size="24" font-weight="700" fill="#4A4458">A</text>
+              </g>
+            </svg>
+          </div>
+
+          <p class="start-desc">
+            Poskladaj obrázok elektrického obvodu z jednotlivých súčiastok! Potiahni správnu súčiastku na prázdne miesto v obvode alebo na ňu ťukni a potom vyber políčko. Pozor na izolanty a nesprávne zapojenia!
+          </p>
+
+          <button id="btn-start" class="btn-primary" type="button">
+            <span>Začať</span>
+            <span>⚡</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ================= GAMEPLAY SCREEN ================= -->
+      <section id="screen-game" class="screen">
+        <header class="game-header">
+          <div class="header-left">
+            <span class="header-game-title">⚡ Elektrický obvod</span>
+            <span id="round-title" class="header-round-title">1. kolo</span>
+          </div>
+          <div class="header-right">
+            <div class="progress-wrap">
+              <span id="progress-text" class="progress-label">Úloha 1 / 8</span>
+              <div id="progress-dots" class="progress-dots"></div>
+            </div>
+            <div id="score-text" class="score-box">Na 1. pokus: 0</div>
+          </div>
+        </header>
+
+        <div class="game-body">
+          <div class="board-column">
+            <div class="task-banner">
+              <span style="font-size: 32px;">🧩</span>
+              <span id="task-prompt">Poskladaj elektrický obvod.</span>
+            </div>
+
+            <div class="circuit-board">
+              <div id="circuit-canvas-wrap" class="circuit-canvas-wrap">
+                <svg id="circuit-svg-layer" class="circuit-svg-layer" viewBox="0 0 1100 620"></svg>
+                <div id="circuit-slots-layer"></div>
+              </div>
+            </div>
+
+            <div class="feedback-row">
+              <div id="feedback-banner" class="feedback-banner">
+                <span id="feedback-icon" class="feedback-icon">💡</span>
+                <span id="feedback-text">Potiahni súčiastku z pravého panela na správne miesto v obvode.</span>
+              </div>
+              <button id="btn-next" class="btn-next" type="button">Ďalej ➜</button>
+            </div>
+          </div>
+
+          <aside class="tray-column">
+            <div class="tray-header">
+              <h2 class="tray-title">Súčiastky</h2>
+              <span class="tray-sub">Potiahni alebo ťukni</span>
+            </div>
+            <div id="parts-grid" class="parts-grid"></div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ================= END SCREEN ================= -->
+      <section id="screen-end" class="screen">
+        <div class="end-card">
+          <div id="end-trophy-svg" aria-hidden="true">
+            <svg viewBox="0 0 220 140" width="220" height="140">
+              <circle cx="110" cy="70" r="62" fill="#FFF1A8" opacity="0.7" />
+              <line x1="110" y1="2" x2="110" y2="16" stroke="#E0B638" stroke-width="5" stroke-linecap="round" />
+              <line x1="44" y1="22" x2="56" y2="34" stroke="#E0B638" stroke-width="5" stroke-linecap="round" />
+              <line x1="176" y1="22" x2="164" y2="34" stroke="#E0B638" stroke-width="5" stroke-linecap="round" />
+              <circle cx="110" cy="68" r="38" fill="#FFF1A8" stroke="#4A4458" stroke-width="4" />
+              <path d="M94 98 L126 98 L122 118 L98 118 Z" fill="#D7C6F5" stroke="#4A4458" stroke-width="3.5" />
+              <rect x="101" y="118" width="18" height="8" rx="4" fill="#BDE0FE" stroke="#4A4458" stroke-width="3" />
+              <circle cx="97" cy="63" r="4" fill="#4A4458" />
+              <circle cx="123" cy="63" r="4" fill="#4A4458" />
+              <path d="M97 76 Q110 88 123 76" fill="none" stroke="#4A4458" stroke-width="3.5" stroke-linecap="round" />
+              <path d="M38 78 L43 89 L55 90 L46 98 L48 110 L38 104 L28 110 L30 98 L21 90 L33 89 Z" fill="#B9FBC0" stroke="#4A4458" stroke-width="2.5" />
+              <path d="M182 78 L187 89 L199 90 L190 98 L192 110 L182 104 L172 110 L174 98 L165 90 L177 89 Z" fill="#FFC8DD" stroke="#4A4458" stroke-width="2.5" />
+            </svg>
+          </div>
+
+          <h1 id="end-title" class="end-title">Výborná práca!</h1>
+
+          <div class="end-stats-row">
+            <div class="end-stat stat-1">
+              <div id="stat-circuits" class="end-stat-value">8 / 8</div>
+              <div class="end-stat-label">Zapojené obvody</div>
+            </div>
+            <div class="end-stat stat-2">
+              <div id="stat-first-try" class="end-stat-value">0 / 32</div>
+              <div class="end-stat-label">Správne na 1. pokus</div>
+            </div>
+            <div class="end-stat stat-3">
+              <div id="stat-percent" class="end-stat-value">100 %</div>
+              <div class="end-stat-label">Úspešnosť</div>
+            </div>
+          </div>
+
+          <p id="end-message" class="end-message">
+            Skvelé! Elektrické obvody a ich súčiastky už ovládaš ako skutočný fyzik.
+          </p>
+
+          <button id="btn-restart" class="btn-primary btn-blue" type="button">
+            <span>Hrať znova</span>
+            <span>🔄</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Subtle signature badge in bottom-right corner of every screen -->
+      <div class="signature-badge" aria-label="Autor hry">
+        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+          <path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z" fill="#FFD166" stroke="#4A4458" stroke-width="1.5" stroke-linejoin="round" />
+        </svg>
+        <span>by: [@schwarz]</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       EDITOVATEĽNÝ ZOZNAM ÚLOH (QUESTIONS)
+       Každé kolo predstavuje jedno puzzle zapojenia elektrického obvodu.
+       - layout: 'loop' | 'parallel_voltmeter' | 'parallel_bulbs'
+       - slots: 4 políčka v obvode (id, roleLabel, correctPartId, x, y)
+       - parts: všetky súčiastky v ponuke (4 správne + 1 alebo 2 nesprávne/izolanty)
+       ========================================================================== */
+    const QUESTIONS = [
+      {
+        id: 'simple_bulb',
+        title: 'Jednoduchý obvod so žiarovkou',
+        prompt: 'Poskladaj základný elektrický obvod tak, aby sa rozsvietila žiarovka.',
+        layout: 'loop',
+        successNote: 'Výborne! Uzavretý obvod zo zdroja, vodiča, spínača a spotrebiča vedie prúd a žiarovka svieti.',
+        slots: [
+          { id: 's1', roleLabel: 'Zdroj napätia', correctPartId: 'battery_45', x: 180, y: 310 },
+          { id: 's2', roleLabel: 'Spínač', correctPartId: 'switch', x: 550, y: 115 },
+          { id: 's3', roleLabel: 'Spotrebič', correctPartId: 'bulb', x: 920, y: 310 },
+          { id: 's4', roleLabel: 'Spojovací vodič', correctPartId: 'wire', x: 550, y: 505 }
+        ],
+        parts: [
+          { id: 'battery_45', name: 'Plochá batéria (4,5 V)', svg: 'battery', symbol: 'battery', okNote: 'Správne! Batéria je zdrojom elektrického napätia.' },
+          { id: 'switch', name: 'Spínač', svg: 'switch', symbol: 'switch', okNote: 'Správne! Spínačom obvod zapíname a vypíname.' },
+          { id: 'bulb', name: 'Žiarovka', svg: 'bulb', symbol: 'bulb', okNote: 'Výborne! Žiarovka je spotrebič, ktorý svieti.' },
+          { id: 'wire', name: 'Medený vodič', svg: 'wire', symbol: 'wire', okNote: 'Presne tak! Meď je výborný elektrický vodič.' },
+          { id: 'plastic_ruler', name: 'Plastové pravítko', svg: 'plastic_ruler', symbol: 'insulator', wrongNote: 'Plastové pravítko je izolant — elektrický prúd ním neprechádza.' }
+        ]
+      },
+      {
+        id: 'motor_circuit',
+        title: 'Obvod s elektromotorom',
+        prompt: 'Zostav chránený obvod s tavnou poistkou, ktorý roztočí malý ventilátor (elektromotor).',
+        layout: 'loop',
+        successNote: 'Skvelé! Elektrická energia z článku roztočila elektromotor a poistka chráni obvod.',
+        slots: [
+          { id: 's1', roleLabel: 'Zdroj napätia', correctPartId: 'battery_cell', x: 180, y: 310 },
+          { id: 's2', roleLabel: 'Ochrana pred skratom', correctPartId: 'fuse', x: 550, y: 115 },
+          { id: 's3', roleLabel: 'Spotrebič (pohon)', correctPartId: 'motor', x: 920, y: 310 },
+          { id: 's4', roleLabel: 'Ovládací prvok', correctPartId: 'switch', x: 550, y: 505 }
+        ],
+        parts: [
+          { id: 'battery_cell', name: 'Elektrický článok (1,5 V)', svg: 'cell', symbol: 'battery', okNote: 'Správne! Elektrický článok dodáva obvodu napätie.' },
+          { id: 'fuse', name: 'Tavná poistka', svg: 'fuse', symbol: 'fuse', okNote: 'Výborne! Poistka preruší obvod pri príliš veľkom prúde.' },
+          { id: 'motor', name: 'Elektromotor s vrtuľkou', svg: 'motor', symbol: 'motor', okNote: 'Super! Elektromotor premieňa elektrickú energiu na pohyb.' },
+          { id: 'switch', name: 'Spínač', svg: 'switch', symbol: 'switch', okNote: 'Správne! Spínač slúži na zapnutie a vypnutie motora.' },
+          { id: 'rubber_band', name: 'Gumová páska', svg: 'rubber_band', symbol: 'insulator', wrongNote: 'Guma je elektrický izolant, do vodivého obvodu nepatrí.' }
+        ]
+      },
+      {
+        id: 'conductors_insulators',
+        title: 'Vodiče a izolanty v obvode',
+        prompt: 'Doplň obvod so zvončekom. Vyber iba vodivé súčiastky a vyhni sa izolantom!',
+        layout: 'loop',
+        successNote: 'Výborne! Medený vodič a ostatné súčiastky vytvorili uzavretú cestu pre prúd a zvonček zvoní.',
+        slots: [
+          { id: 's1', roleLabel: 'Zdroj napätia', correctPartId: 'battery_45', x: 180, y: 310 },
+          { id: 's2', roleLabel: 'Spínač', correctPartId: 'switch', x: 550, y: 115 },
+          { id: 's3', roleLabel: 'Zvukový spotrebič', correctPartId: 'bell', x: 920, y: 310 },
+          { id: 's4', roleLabel: 'Vodivé prepojenie', correctPartId: 'wire', x: 550, y: 505 }
+        ],
+        parts: [
+          { id: 'battery_45', name: 'Batéria (4,5 V)', svg: 'battery', symbol: 'battery', okNote: 'Správne! Batéria poháňa celý obvod.' },
+          { id: 'switch', name: 'Spínač', svg: 'switch', symbol: 'switch', okNote: 'Správne! Spínač ovláda zvonenie.' },
+          { id: 'bell', name: 'Elektrický zvonček', svg: 'bell', symbol: 'bell', okNote: 'Výborne! Zvonček je spotrebič v obvode.' },
+          { id: 'wire', name: 'Medený vodič', svg: 'wire', symbol: 'wire', okNote: 'Správne! Kovový vodič vedie elektrický prúd.' },
+          { id: 'glass_rod', name: 'Sklenená tyčinka', svg: 'glass_rod', symbol: 'insulator', wrongNote: 'Sklo je izolant — elektrický prúd cezeň nepotečie.' },
+          { id: 'wood_stick', name: 'Drevená špajdľa', svg: 'wood_stick', symbol: 'insulator', wrongNote: 'Suché drevo je izolant a nevedie elektrický prúd.' }
+        ]
+      },
+      {
+        id: 'ammeter_series',
+        title: 'Meranie prúdu ampérmetrom',
+        prompt: 'Zapoj do obvodu ampérmeter tak, aby meral prúd pretekajúci žiarovkou (zapája sa sériovo).',
+        layout: 'loop',
+        successNote: 'Presne tak! Ampérmeter zapojený sériovo do jednej slučky presne zmeria elektrický prúd.',
+        slots: [
+          { id: 's1', roleLabel: 'Zdroj napätia', correctPartId: 'battery_45', x: 180, y: 310 },
+          { id: 's2', roleLabel: 'Merací prístroj prúdu', correctPartId: 'ammeter', x: 550, y: 115 },
+          { id: 's3', roleLabel: 'Spotrebič', correctPartId: 'bulb', x: 920, y: 310 },
+          { id: 's4', roleLabel: 'Spínač', correctPartId: 'switch', x: 550, y: 505 }
+        ],
+        parts: [
+          { id: 'battery_45', name: 'Batéria (4,5 V)', svg: 'battery', symbol: 'battery', okNote: 'Správne! Zdroj napätia patrí na začiatok obvodu.' },
+          { id: 'ammeter', name: 'Ampérmeter (A)', svg: 'ammeter', symbol: 'ammeter', okNote: 'Výborne! Ampérmeter sa zapája do série na meranie prúdu.' },
+          { id: 'bulb', name: 'Žiarovka', svg: 'bulb', symbol: 'bulb', okNote: 'Správne! Prúd zo zdroja prechádza aj cez žiarovku.' },
+          { id: 'switch', name: 'Spínač', svg: 'switch', symbol: 'switch', okNote: 'Správne! Spínač uzavrie celý obvod.' },
+          { id: 'voltmeter', name: 'Voltmeter (V)', svg: 'voltmeter', symbol: 'voltmeter', wrongNote: 'Voltmeter meria napätie a zapája sa paralelne k spotrebiču, nie do série na meranie prúdu!' }
+        ]
+      },
+      {
+        id: 'voltmeter_parallel',
+        title: 'Meranie napätia voltmetrom',
+        prompt: 'Zmeraj elektrické napätie na žiarovke! Voltmeter pripoj paralelne na jej svorky.',
+        layout: 'parallel_voltmeter',
+        successNote: 'Skvelá práca! Voltmeter pripojený paralelne k žiarovke ukázal napätie 4,5 V.',
+        slots: [
+          { id: 's1', roleLabel: 'Zdroj napätia', correctPartId: 'battery_45', x: 180, y: 310 },
+          { id: 's2', roleLabel: 'Spínač v hlavnej vetve', correctPartId: 'switch', x: 450, y: 505 },
+          { id: 's3', roleLabel: 'Spotrebič', correctPartId: 'bulb', x: 670, y: 310 },
+          { id: 's4', roleLabel: 'Paralelná vetva (meranie U)', correctPartId: 'voltmeter', x: 945, y: 310 }
+        ],
+        parts: [
+          { id: 'battery_45', name: 'Batéria (4,5 V)', svg: 'battery', symbol: 'battery', okNote: 'Správne! Batéria vytvára napätie v obvode.' },
+          { id: 'switch', name: 'Spínač', svg: 'switch', symbol: 'switch', okNote: 'Správne! Spínač zapína hlavný obvod.' },
+          { id: 'bulb', name: 'Žiarovka', svg: 'bulb', symbol: 'bulb', okNote: 'Výborne! Na žiarovke meriame elektrické napätie.' },
+          { id: 'voltmeter', name: 'Voltmeter (V)', svg: 'voltmeter', symbol: 'voltmeter', okNote: 'Výborne! Voltmeter vždy zapájame paralelne vedľa spotrebiča.' },
+          { id: 'ammeter', name: 'Ampérmeter (A)', svg: 'ammeter', symbol: 'ammeter', wrongNote: 'Pozor! Ampérmeter zapojený paralelne by spôsobil skrat.' }
+        ]
+      },
+      {
+        id: 'series_bulbs',
+        title: 'Sériové zapojenie žiaroviek',
+        prompt: 'Zapoj dve žiarovky za sebou (sériovo). Rovnaký prúd prechádza oboma žiarovkami.',
+        layout: 'loop',
+        successNote: 'Super! V sériovom zapojení tečie prúd jednou cestou postupne cez obe žiarovky.',
+        slots: [
+          { id: 's1', roleLabel: 'Zdroj napätia', correctPartId: 'battery_45', x: 180, y: 310 },
+          { id: 's2', roleLabel: '1. žiarovka v sérii', correctPartId: 'bulb_1', acceptGroup: 'bulb', x: 550, y: 115 },
+          { id: 's3', roleLabel: '2. žiarovka v sérii', correctPartId: 'bulb_2', acceptGroup: 'bulb', x: 920, y: 310 },
+          { id: 's4', roleLabel: 'Spínač', correctPartId: 'switch', x: 550, y: 505 }
+        ],
+        parts: [
+          { id: 'battery_45', name: 'Batéria (4,5 V)', svg: 'battery', symbol: 'battery', okNote: 'Správne! Batéria napája obe žiarovky.' },
+          { id: 'bulb_1', name: 'Žiarovka Ž₁', group: 'bulb', svg: 'bulb', symbol: 'bulb', okNote: 'Výborne! Prvá žiarovka je zapojená v sérii.' },
+          { id: 'bulb_2', name: 'Žiarovka Ž₂', group: 'bulb', svg: 'bulb', symbol: 'bulb', okNote: 'Výborne! Druhá žiarovka je zapojená v sérii.' },
+          { id: 'switch', name: 'Spínač', svg: 'switch', symbol: 'switch', okNote: 'Správne! Spínač zapína obe sériové žiarovky naraz.' },
+          { id: 'broken_wire', name: 'Prerušený vodič', svg: 'broken_wire', symbol: 'broken', wrongNote: 'Prerušený vodič by zastavil prúd a zhasli by obe žiarovky!' }
+        ]
+      },
+      {
+        id: 'parallel_bulbs',
+        title: 'Paralelné zapojenie žiaroviek',
+        prompt: 'Zapoj dve žiarovky vedľa seba (paralelne) do dvoch vetiev, ako sú zapojené svetlá v domácnosti.',
+        layout: 'parallel_bulbs',
+        successNote: 'Výborne! V paralelnom obvode sa prúd rozdelí do dvoch vetiev a každá žiarovka svieti naplno.',
+        slots: [
+          { id: 's1', roleLabel: 'Zdroj napätia', correctPartId: 'battery_45', x: 170, y: 310 },
+          { id: 's2', roleLabel: 'Hlavný spínač', correctPartId: 'switch', x: 380, y: 505 },
+          { id: 's3', roleLabel: '1. paralelná vetva', correctPartId: 'bulb_1', acceptGroup: 'bulb', x: 610, y: 310 },
+          { id: 's4', roleLabel: '2. paralelná vetva', correctPartId: 'bulb_2', acceptGroup: 'bulb', x: 920, y: 310 }
+        ],
+        parts: [
+          { id: 'battery_45', name: 'Batéria (4,5 V)', svg: 'battery', symbol: 'battery', okNote: 'Správne! Zdroj dodáva rovnaké napätie do oboch vetiev.' },
+          { id: 'switch', name: 'Hlavný spínač', svg: 'switch', symbol: 'switch', okNote: 'Správne! Hlavný spínač ovláda prívod do vetiev.' },
+          { id: 'bulb_1', name: 'Žiarovka Ž₁', group: 'bulb', svg: 'bulb', symbol: 'bulb', okNote: 'Výborne! Žiarovka je zapojená vo vlastnej vetve.' },
+          { id: 'bulb_2', name: 'Žiarovka Ž₂', group: 'bulb', svg: 'bulb', symbol: 'bulb', okNote: 'Výborne! Žiarovka je zapojená v paralelnej vetve.' },
+          { id: 'plastic_ruler', name: 'Plastové pravítko', svg: 'plastic_ruler', symbol: 'insulator', wrongNote: 'Plast je izolant — cez takúto vetvu by prúd neprešiel.' }
+        ]
+      },
+      {
+        id: 'led_resistor',
+        title: 'Ochrana LED diódy rezistorom',
+        prompt: 'Poskladaj bezpečný obvod s LED diódou, rezistorom (obmedzí prúd) a tavnou poistkou.',
+        layout: 'loop',
+        successNote: 'Paráda! Rezistor znížil prúd na bezpečnú hodnotu a LED dióda pekne svieti.',
+        slots: [
+          { id: 's1', roleLabel: 'Zdroj napätia', correctPartId: 'battery_45', x: 180, y: 310 },
+          { id: 's2', roleLabel: 'Ochranný odpor', correctPartId: 'resistor', x: 550, y: 115 },
+          { id: 's3', roleLabel: 'Svetelná dióda', correctPartId: 'led', x: 920, y: 310 },
+          { id: 's4', roleLabel: 'Poistka obvodu', correctPartId: 'fuse', x: 550, y: 505 }
+        ],
+        parts: [
+          { id: 'battery_45', name: 'Batéria (4,5 V)', svg: 'battery', symbol: 'battery', okNote: 'Správne! Batéria napája obvod s diódou.' },
+          { id: 'resistor', name: 'Rezistor (R)', svg: 'resistor', symbol: 'resistor', okNote: 'Výborne! Rezistor zmenšuje elektrický prúd, aby sa LED nezničila.' },
+          { id: 'led', name: 'LED dióda', svg: 'led', symbol: 'led', okNote: 'Správne! LED dióda je úsporný svetelný spotrebič.' },
+          { id: 'fuse', name: 'Tavná poistka', svg: 'fuse', symbol: 'fuse', okNote: 'Správne! Poistka chráni súčiastky pred preťažením.' },
+          { id: 'broken_wire', name: 'Prerušený vodič', svg: 'broken_wire', symbol: 'broken', wrongNote: 'Prerušeným vodičom elektrický prúd neprejde.' }
+        ]
+      }
+    ];
+
+    /* ==========================================================================
+       AUDIO SYNTHESIS (Web Audio API only — no external sound files)
+       ========================================================================== */
+    const VOICE_FILES = {
+      intro: [
+        { primary: '/assets/aistudio/intro_1_c4af1896.mp3', fallback: 'intro.mp3' },
+        { primary: '/assets/aistudio/intro_2_33fa3f7d.mp3', fallback: 'intro.mp3' },
+        { primary: '/assets/aistudio/intro_3_b4470a69.mp3', fallback: 'intro.mp3' }
+      ],
+      correct: [
+        { primary: '/assets/aistudio/correct_1_55c16383.mp3', fallback: 'correct_1.mp3' },
+        { primary: '/assets/aistudio/correct_2_9f41ee42.mp3', fallback: 'correct_2.mp3' },
+        { primary: '/assets/aistudio/correct_3_87d6abd7.mp3', fallback: 'correct_3.mp3' }
+      ],
+      wrong: [
+        { primary: '/assets/aistudio/wrong_1_53dd6496.mp3', fallback: 'wrong_1.mp3' },
+        { primary: '/assets/aistudio/wrong_2_9dd0ebb1.mp3', fallback: 'wrong_2.mp3' }
+      ],
+      outro_win_1: [
+        { primary: '/assets/aistudio/outro_win_1_073f570c.mp3', fallback: 'outro_win_1.mp3' }
+      ],
+      outro_win_2: [
+        { primary: '/assets/aistudio/outro_win_2_a92a18dd.mp3', fallback: 'outro_win_2.mp3' }
+      ]
+    };
+
+    const SoundFX = {
+      ctx: null,
+      muted: false,
+      currentVoice: null,
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) {
+            this.ctx = new AudioCtx();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+      },
+      stopVoice() {
+        if (this.currentVoice) {
+          try {
+            this.currentVoice.pause();
+            this.currentVoice.currentTime = 0;
+          } catch (_) {}
+          this.currentVoice = null;
+        }
+      },
+      playVoice(category) {
+        if (this.muted) return;
+        const list = VOICE_FILES[category];
+        if (!list || !list.length) return;
+        const chosen = list[Math.floor(Math.random() * list.length)];
+        this.stopVoice();
+
+        const audio = new Audio(chosen.primary);
+        audio.volume = 0.95;
+        let triedFallback = false;
+        audio.addEventListener('error', () => {
+          if (!triedFallback && chosen.fallback) {
+            triedFallback = true;
+            audio.src = chosen.fallback;
+            audio.play().catch(() => {});
+          }
+        });
+        this.currentVoice = audio;
+        audio.play().catch(() => {});
+      },
+      playTone(freq, startOffset, duration, type = 'sine', volume = 0.16, endFreq = null) {
+        if (this.muted || !this.ctx) return;
+        const now = this.ctx.currentTime + startOffset;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+        if (endFreq !== null) {
+          osc.frequency.exponentialRampToValueAtTime(endFreq, now + duration);
+        }
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(volume, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration + 0.02);
+      },
+      correct() {
+        this.init();
+        this.playTone(523.25, 0, 0.16, 'triangle', 0.14);
+        this.playTone(659.25, 0.11, 0.24, 'triangle', 0.15);
+        this.playVoice('correct');
+      },
+      wrong() {
+        this.init();
+        this.playTone(210, 0, 0.22, 'sine', 0.13, 145);
+        this.playVoice('wrong');
+      },
+      circuitComplete() {
+        this.init();
+        this.playTone(523.25, 0, 0.14, 'triangle', 0.14);
+        this.playTone(659.25, 0.1, 0.14, 'triangle', 0.14);
+        this.playTone(783.99, 0.2, 0.28, 'triangle', 0.15);
+        this.playVoice('correct');
+      },
+      finished(pct = 100) {
+        this.init();
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((n, idx) => {
+          this.playTone(n, idx * 0.12, idx === notes.length - 1 ? 0.36 : 0.16, 'triangle', 0.15);
+        });
+        this.playVoice(pct >= 70 ? 'outro_win_2' : 'outro_win_1');
+      }
+    };
+
+    /* ==========================================================================
+       INLINE SVG GRAPHICS FOR COMPONENTS & SCHEMATIC SYMBOLS
+       ========================================================================== */
+    function getSchematicSymbolSVG(symbolType) {
+      const s = '#4A4458';
+      switch (symbolType) {
+        case 'battery':
+          return `<svg viewBox="0 0 48 28" width="44" height="26">
+            <line x1="2" y1="14" x2="17" y2="14" stroke="${s}" stroke-width="2.5"/>
+            <line x1="17" y1="4" x2="17" y2="24" stroke="${s}" stroke-width="2.5"/>
+            <line x1="24" y1="9" x2="24" y2="19" stroke="${s}" stroke-width="4"/>
+            <line x1="24" y1="14" x2="46" y2="14" stroke="${s}" stroke-width="2.5"/>
+            <text x="8" y="10" font-size="9" font-weight="800" fill="${s}">+</text>
+          </svg>`;
+        case 'switch':
+          return `<svg viewBox="0 0 48 28" width="44" height="26">
+            <line x1="2" y1="18" x2="14" y2="18" stroke="${s}" stroke-width="2.5"/>
+            <circle cx="15" cy="18" r="2.5" fill="${s}"/>
+            <line x1="15" y1="18" x2="32" y2="7" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="33" cy="18" r="2.5" fill="${s}"/>
+            <line x1="34" y1="18" x2="46" y2="18" stroke="${s}" stroke-width="2.5"/>
+          </svg>`;
+        case 'bulb':
+          return `<svg viewBox="0 0 48 28" width="44" height="26">
+            <line x1="2" y1="14" x2="14" y2="14" stroke="${s}" stroke-width="2.5"/>
+            <circle cx="24" cy="14" r="10" fill="#FFF" stroke="${s}" stroke-width="2.2"/>
+            <line x1="17" y1="7" x2="31" y2="21" stroke="${s}" stroke-width="2"/>
+            <line x1="31" y1="7" x2="17" y2="21" stroke="${s}" stroke-width="2"/>
+            <line x1="34" y1="14" x2="46" y2="14" stroke="${s}" stroke-width="2.5"/>
+          </svg>`;
+        case 'wire':
+          return `<svg viewBox="0 0 48 28" width="44" height="26">
+            <line x1="4" y1="14" x2="44" y2="14" stroke="${s}" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="8" cy="14" r="3" fill="${s}"/>
+            <circle cx="40" cy="14" r="3" fill="${s}"/>
+          </svg>`;
+        case 'motor':
+          return `<svg viewBox="0 0 48 28" width="44" height="26">
+            <line x1="2" y1="14" x2="14" y2="14" stroke="${s}" stroke-width="2.5"/>
+            <circle cx="24" cy="14" r="10" fill="#FFF" stroke="${s}" stroke-width="2.2"/>
+            <text x="24" y="18" text-anchor="middle" font-size="12" font-weight="800" fill="${s}">M</text>
+            <line x1="34" y1="14" x2="46" y2="14" stroke="${s}" stroke-width="2.5"/>
+          </svg>`;
+        case 'bell':
+          return `<svg viewBox="0 0 48 28" width="44" height="26">
+            <path d="M14 19 A10 10 0 0 1 34 19 Z" fill="#FFF" stroke="${s}" stroke-width="2.2"/>
+            <line x1="18" y1="19" x2="18" y2="25" stroke="${s}" stroke-width="2"/>
+            <line x1="30" y1="19" x2="30" y2="25" stroke="${s}" stroke-width="2"/>
+          </svg>`;
+        case 'ammeter':
+          return `<svg viewBox="0 0 48 28" width="44" height="26">
+            <line x1="2" y1="14" x2="14" y2="14" stroke="${s}" stroke-width="2.5"/>
+            <circle cx="24" cy="14" r="10" fill="#FFF" stroke="${s}" stroke-width="2.2"/>
+            <text x="24" y="18" text-anchor="middle" font-size="12" font-weight="800" fill="${s}">A</text>
+            <line x1="34" y1="14" x2="46" y2="14" stroke="${s}" stroke-width="2.5"/>
+          </svg>`;
+        case 'voltmeter':
+          return `<svg viewBox="0 0 48 28" width="44" height="26">
+            <line x1="2" y1="14" x2="14" y2="14" stroke="${s}" stroke-width="2.5"/>
+            <circle cx="24" cy="14" r="10" fill="#FFF" stroke="${s}" stroke-width="2.2"/>
+            <text x="24" y="18" text-anchor="middle" font-size="12" font-weight="800" fill="${s}">V</text>
+            <line x1="34" y1="14" x2="46" y2="14" stroke="${s}" stroke-width="2.5"/>
+          </svg>`;
+        case 'fuse':
+          return `<svg viewBox="0 0 48 28" width="44" height="26">
+            <line x1="2" y1="14" x2="46" y2="14" stroke="${s}" stroke-width="2.2"/>
+            <rect x="13" y="8" width="22" height="12" fill="none" stroke="${s}" stroke-width="2.2"/>
+          </svg>`;
+        case 'resistor':
+          return `<svg viewBox="0 0 48 28" width="44" height="26">
+            <line x1="2" y1="14" x2="13" y2="14" stroke="${s}" stroke-width="2.5"/>
+            <rect x="13" y="8" width="22" height="12" fill="#FFF" stroke="${s}" stroke-width="2.2"/>
+            <line x1="35" y1="14" x2="46" y2="14" stroke="${s}" stroke-width="2.5"/>
+          </svg>`;
+        case 'led':
+          return `<svg viewBox="0 0 48 28" width="44" height="26">
+            <line x1="2" y1="15" x2="46" y2="15" stroke="${s}" stroke-width="2.2"/>
+            <polygon points="17,8 17,22 29,15" fill="#FFF" stroke="${s}" stroke-width="2.2"/>
+            <line x1="29" y1="8" x2="29" y2="22" stroke="${s}" stroke-width="2.4"/>
+            <line x1="26" y1="6" x2="31" y2="2" stroke="${s}" stroke-width="1.8"/>
+            <line x1="31" y1="8" x2="36" y2="4" stroke="${s}" stroke-width="1.8"/>
+          </svg>`;
+        default:
+          return `<svg viewBox="0 0 48 28" width="44" height="26">
+            <text x="24" y="19" text-anchor="middle" font-family="Nunito" font-size="16" font-weight="800" fill="#8D82A3">?</text>
+          </svg>`;
+      }
+    }
+
+    function getComponentSVG(svgType, isActive = false) {
+      const s = '#4A4458';
+      switch (svgType) {
+        case 'battery':
+          return `<svg viewBox="0 0 150 94" width="100%" height="100%">
+            <line x1="6" y1="48" x2="36" y2="48" stroke="#D99B52" stroke-width="6" stroke-linecap="round"/>
+            <line x1="114" y1="48" x2="144" y2="48" stroke="#D99B52" stroke-width="6" stroke-linecap="round"/>
+            <rect x="44" y="12" width="18" height="16" rx="4" fill="#FFD6A5" stroke="${s}" stroke-width="3"/>
+            <rect x="88" y="12" width="18" height="16" rx="4" fill="#FFD6A5" stroke="${s}" stroke-width="3"/>
+            <rect x="34" y="24" width="82" height="58" rx="14" fill="#BDE0FE" stroke="${s}" stroke-width="3.5"/>
+            <rect x="42" y="34" width="66" height="38" rx="9" fill="#FFF1A8" stroke="${s}" stroke-width="2.5"/>
+            <text x="54" y="59" text-anchor="middle" font-family="Nunito" font-size="22" font-weight="800" fill="${s}">+</text>
+            <text x="96" y="59" text-anchor="middle" font-family="Nunito" font-size="22" font-weight="800" fill="${s}">−</text>
+            <text x="75" y="58" text-anchor="middle" font-family="Nunito" font-size="14" font-weight="800" fill="${s}">4,5V</text>
+          </svg>`;
+        case 'cell':
+          return `<svg viewBox="0 0 150 94" width="100%" height="100%">
+            <line x1="6" y1="48" x2="30" y2="48" stroke="#D99B52" stroke-width="6" stroke-linecap="round"/>
+            <line x1="120" y1="48" x2="144" y2="48" stroke="#D99B52" stroke-width="6" stroke-linecap="round"/>
+            <rect x="30" y="25" width="84" height="46" rx="12" fill="#FFF1A8" stroke="${s}" stroke-width="3.5"/>
+            <rect x="30" y="25" width="26" height="46" rx="10" fill="#FFD6A5" stroke="${s}" stroke-width="3.5"/>
+            <rect x="114" y="36" width="10" height="24" rx="4" fill="#BDE0FE" stroke="${s}" stroke-width="3"/>
+            <text x="98" y="55" text-anchor="middle" font-family="Nunito" font-size="22" font-weight="800" fill="${s}">+</text>
+            <text x="43" y="55" text-anchor="middle" font-family="Nunito" font-size="22" font-weight="800" fill="${s}">−</text>
+          </svg>`;
+        case 'bulb':
+          return `<svg viewBox="0 0 150 94" width="100%" height="100%">
+            ${isActive ? `
+              <circle cx="75" cy="40" r="36" fill="#FFF1A8" opacity="0.9"/>
+              <line x1="75" y1="1" x2="75" y2="9" stroke="#E0B638" stroke-width="4" stroke-linecap="round"/>
+              <line x1="39" y1="16" x2="46" y2="23" stroke="#E0B638" stroke-width="4" stroke-linecap="round"/>
+              <line x1="111" y1="16" x2="104" y2="23" stroke="#E0B638" stroke-width="4" stroke-linecap="round"/>
+              <line x1="30" y1="42" x2="40" y2="42" stroke="#E0B638" stroke-width="4" stroke-linecap="round"/>
+              <line x1="120" y1="42" x2="110" y2="42" stroke="#E0B638" stroke-width="4" stroke-linecap="round"/>
+            ` : ''}
+            <line x1="10" y1="74" x2="54" y2="74" stroke="#D99B52" stroke-width="6" stroke-linecap="round"/>
+            <line x1="96" y1="74" x2="140" y2="74" stroke="#D99B52" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="75" cy="40" r="26" fill="${isActive ? '#FFE97D' : '#F4F7FA'}" stroke="${s}" stroke-width="3.5"/>
+            <path d="M66 56 L66 38 Q75 26 84 38 L84 56" fill="none" stroke="${isActive ? '#E69F00' : '#948CA3'}" stroke-width="3" stroke-linecap="round"/>
+            <rect x="61" y="61" width="28" height="19" rx="5" fill="#D7C6F5" stroke="${s}" stroke-width="3"/>
+            <rect x="52" y="76" width="46" height="10" rx="5" fill="#BDE0FE" stroke="${s}" stroke-width="2.5"/>
+          </svg>`;
+        case 'switch':
+          return `<svg viewBox="0 0 150 94" width="100%" height="100%">
+            <rect x="24" y="56" width="102" height="22" rx="10" fill="#D7C6F5" stroke="${s}" stroke-width="3"/>
+            <line x1="8" y1="54" x2="44" y2="54" stroke="#D99B52" stroke-width="6" stroke-linecap="round"/>
+            <line x1="106" y1="54" x2="142" y2="54" stroke="#D99B52" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="44" cy="54" r="8" fill="#FFD6A5" stroke="${s}" stroke-width="3"/>
+            <circle cx="106" cy="54" r="8" fill="#FFD6A5" stroke="${s}" stroke-width="3"/>
+            ${isActive
+              ? `<line x1="44" y1="54" x2="106" y2="54" stroke="${s}" stroke-width="6" stroke-linecap="round"/>
+                 <rect x="64" y="42" width="22" height="10" rx="5" fill="#B9FBC0" stroke="${s}" stroke-width="2.5"/>`
+              : `<line x1="44" y1="54" x2="96" y2="24" stroke="${s}" stroke-width="6" stroke-linecap="round"/>
+                 <circle cx="98" cy="23" r="8" fill="#FFC8DD" stroke="${s}" stroke-width="3"/>`
+            }
+          </svg>`;
+        case 'wire':
+          return `<svg viewBox="0 0 150 94" width="100%" height="100%">
+            <path d="M12 48 C40 48, 44 26, 75 26 C106 26, 110 68, 138 48" fill="none" stroke="${s}" stroke-width="14" stroke-linecap="round"/>
+            <path d="M12 48 C40 48, 44 26, 75 26 C106 26, 110 68, 138 48" fill="none" stroke="#BDE0FE" stroke-width="8" stroke-linecap="round"/>
+            <circle cx="14" cy="48" r="9" fill="#FFD6A5" stroke="${s}" stroke-width="3"/>
+            <circle cx="136" cy="48" r="9" fill="#FFD6A5" stroke="${s}" stroke-width="3"/>
+          </svg>`;
+        case 'motor':
+          return `<svg viewBox="0 0 150 94" width="100%" height="100%">
+            <line x1="8" y1="56" x2="36" y2="56" stroke="#D99B52" stroke-width="6" stroke-linecap="round"/>
+            <line x1="114" y1="56" x2="142" y2="56" stroke="#D99B52" stroke-width="6" stroke-linecap="round"/>
+            <rect x="36" y="34" width="54" height="42" rx="12" fill="#BDE0FE" stroke="${s}" stroke-width="3.5"/>
+            <text x="63" y="62" text-anchor="middle" font-family="Baloo 2" font-size="24" font-weight="700" fill="${s}">M</text>
+            <line x1="90" y1="55" x2="108" y2="55" stroke="${s}" stroke-width="5"/>
+            <g class="${isActive ? 'spin-fan' : ''}" style="transform-origin: 112px 55px;">
+              <ellipse cx="112" cy="34" rx="8" ry="18" fill="#FFC8DD" stroke="${s}" stroke-width="2.5"/>
+              <ellipse cx="112" cy="76" rx="8" ry="18" fill="#FFF1A8" stroke="${s}" stroke-width="2.5"/>
+              <circle cx="112" cy="55" r="7" fill="#D7C6F5" stroke="${s}" stroke-width="2.5"/>
+            </g>
+          </svg>`;
+        case 'bell':
+          return `<svg viewBox="0 0 150 94" width="100%" height="100%">
+            <line x1="8" y1="70" x2="44" y2="70" stroke="#D99B52" stroke-width="6" stroke-linecap="round"/>
+            <line x1="106" y1="70" x2="142" y2="70" stroke="#D99B52" stroke-width="6" stroke-linecap="round"/>
+            <g class="${isActive ? 'bell-ringing' : ''}">
+              <path d="M44 58 A31 31 0 0 1 106 58 Z" fill="#FFF1A8" stroke="${s}" stroke-width="3.5"/>
+              <circle cx="75" cy="23" r="6" fill="#FFD6A5" stroke="${s}" stroke-width="2.5"/>
+              <rect x="40" y="58" width="70" height="16" rx="8" fill="#D7C6F5" stroke="${s}" stroke-width="3"/>
+              <circle cx="75" cy="78" r="7" fill="#FFC8DD" stroke="${s}" stroke-width="2.5"/>
+            </g>
+            ${isActive ? `
+              <path d="M26 30 Q18 44 26 56" fill="none" stroke="#6CC97B" stroke-width="3.5" stroke-linecap="round"/>
+              <path d="M124 30 Q132 44 124 56" fill="none" stroke="#6CC97B" stroke-width="3.5" stroke-linecap="round"/>
+            ` : ''}
+          </svg>`;
+        case 'ammeter':
+          return `<svg viewBox="0 0 150 94" width="100%" height="100%">
+            <line x1="8" y1="48" x2="38" y2="48" stroke="#D99B52" stroke-width="6" stroke-linecap="round"/>
+            <line x1="112" y1="48" x2="142" y2="48" stroke="#D99B52" stroke-width="6" stroke-linecap="round"/>
+            <rect x="34" y="10" width="82" height="74" rx="20" fill="#FFC8DD" stroke="${s}" stroke-width="3.5"/>
+            <circle cx="75" cy="47" r="28" fill="#FFFFFF" stroke="${s}" stroke-width="3"/>
+            <text x="75" y="65" text-anchor="middle" font-family="Baloo 2" font-size="22" font-weight="700" fill="${s}">A</text>
+            <line x1="75" y1="47" x2="${isActive ? '93' : '58'}" y2="${isActive ? '29' : '31'}" stroke="#E06D94" stroke-width="3.5" stroke-linecap="round"/>
+            <circle cx="75" cy="47" r="4" fill="${s}"/>
+          </svg>`;
+        case 'voltmeter':
+          return `<svg viewBox="0 0 150 94" width="100%" height="100%">
+            <line x1="8" y1="48" x2="38" y2="48" stroke="#D99B52" stroke-width="6" stroke-linecap="round"/>
+            <line x1="112" y1="48" x2="142" y2="48" stroke="#D99B52" stroke-width="6" stroke-linecap="round"/>
+            <rect x="34" y="10" width="82" height="74" rx="20" fill="#BDE0FE" stroke="${s}" stroke-width="3.5"/>
+            <circle cx="75" cy="47" r="28" fill="#FFFFFF" stroke="${s}" stroke-width="3"/>
+            <text x="75" y="65" text-anchor="middle" font-family="Baloo 2" font-size="22" font-weight="700" fill="${s}">V</text>
+            <line x1="75" y1="47" x2="${isActive ? '95' : '58'}" y2="${isActive ? '30' : '31'}" stroke="#4D8FCC" stroke-width="3.5" stroke-linecap="round"/>
+            <circle cx="75" cy="47" r="4" fill="${s}"/>
+          </svg>`;
+        case 'fuse':
+          return `<svg viewBox="0 0 150 94" width="100%" height="100%">
+            <line x1="10" y1="47" x2="140" y2="47" stroke="${s}" stroke-width="3.5"/>
+            <rect x="34" y="28" width="82" height="38" rx="12" fill="#FFFFFF" stroke="${s}" stroke-width="3.5"/>
+            <rect x="28" y="26" width="18" height="42" rx="6" fill="#FFD6A5" stroke="${s}" stroke-width="3"/>
+            <rect x="104" y="26" width="18" height="42" rx="6" fill="#FFD6A5" stroke="${s}" stroke-width="3"/>
+            <path d="M46 47 Q60 36 75 47 Q90 58 104 47" fill="none" stroke="#E69F00" stroke-width="3.5"/>
+          </svg>`;
+        case 'resistor':
+          return `<svg viewBox="0 0 150 94" width="100%" height="100%">
+            <line x1="8" y1="47" x2="142" y2="47" stroke="#D99B52" stroke-width="6" stroke-linecap="round"/>
+            <rect x="34" y="27" width="82" height="40" rx="14" fill="#FFD6A5" stroke="${s}" stroke-width="3.5"/>
+            <rect x="49" y="27" width="10" height="40" fill="#FFC8DD" />
+            <rect x="69" y="27" width="10" height="40" fill="#BDE0FE" />
+            <rect x="89" y="27" width="10" height="40" fill="#D7C6F5" />
+            <rect x="34" y="27" width="82" height="40" rx="14" fill="none" stroke="${s}" stroke-width="3.5"/>
+          </svg>`;
+        case 'led':
+          return `<svg viewBox="0 0 150 94" width="100%" height="100%">
+            ${isActive ? `<circle cx="75" cy="40" r="34" fill="#B9FBC0" opacity="0.85"/>` : ''}
+            <line x1="12" y1="74" x2="64" y2="74" stroke="#D99B52" stroke-width="5" stroke-linecap="round"/>
+            <line x1="86" y1="74" x2="138" y2="74" stroke="#D99B52" stroke-width="5" stroke-linecap="round"/>
+            <line x1="64" y1="54" x2="64" y2="78" stroke="${s}" stroke-width="4" stroke-linecap="round"/>
+            <line x1="86" y1="54" x2="86" y2="78" stroke="${s}" stroke-width="4" stroke-linecap="round"/>
+            <path d="M53 56 L53 34 A22 22 0 0 1 97 34 L97 56 Z" fill="${isActive ? '#8DF59A' : '#E7FCEE'}" stroke="${s}" stroke-width="3.5"/>
+            <rect x="48" y="54" width="54" height="10" rx="5" fill="#B9FBC0" stroke="${s}" stroke-width="3"/>
+          </svg>`;
+        case 'plastic_ruler':
+          return `<svg viewBox="0 0 150 94" width="100%" height="100%">
+            <g transform="rotate(-10 75 47)">
+              <rect x="16" y="30" width="118" height="34" rx="8" fill="#FFC8DD" stroke="${s}" stroke-width="3"/>
+              <line x1="32" y1="30" x2="32" y2="42" stroke="${s}" stroke-width="2.5"/>
+              <line x1="48" y1="30" x2="48" y2="39" stroke="${s}" stroke-width="2"/>
+              <line x1="64" y1="30" x2="64" y2="42" stroke="${s}" stroke-width="2.5"/>
+              <line x1="80" y1="30" x2="80" y2="39" stroke="${s}" stroke-width="2"/>
+              <line x1="96" y1="30" x2="96" y2="42" stroke="${s}" stroke-width="2.5"/>
+              <line x1="112" y1="30" x2="112" y2="39" stroke="${s}" stroke-width="2"/>
+            </g>
+          </svg>`;
+        case 'rubber_band':
+          return `<svg viewBox="0 0 150 94" width="100%" height="100%">
+            <ellipse cx="75" cy="48" rx="48" ry="22" fill="none" stroke="${s}" stroke-width="14"/>
+            <ellipse cx="75" cy="48" rx="48" ry="22" fill="none" stroke="#FFD6A5" stroke-width="8"/>
+          </svg>`;
+        case 'glass_rod':
+          return `<svg viewBox="0 0 150 94" width="100%" height="100%">
+            <g transform="rotate(-12 75 47)">
+              <rect x="16" y="36" width="118" height="22" rx="11" fill="#E0F2FE" stroke="${s}" stroke-width="3"/>
+              <line x1="28" y1="43" x2="118" y2="43" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+            </g>
+          </svg>`;
+        case 'wood_stick':
+          return `<svg viewBox="0 0 150 94" width="100%" height="100%">
+            <g transform="rotate(-8 75 47)">
+              <rect x="16" y="36" width="118" height="20" rx="8" fill="#F2D2A9" stroke="${s}" stroke-width="3"/>
+              <line x1="30" y1="44" x2="72" y2="44" stroke="#C69C6D" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="86" y1="49" x2="122" y2="49" stroke="#C69C6D" stroke-width="2.5" stroke-linecap="round"/>
+            </g>
+          </svg>`;
+        case 'broken_wire':
+          return `<svg viewBox="0 0 150 94" width="100%" height="100%">
+            <path d="M12 48 L56 48 L63 36" fill="none" stroke="${s}" stroke-width="10" stroke-linecap="round"/>
+            <path d="M12 48 L56 48 L63 36" fill="none" stroke="#FFC8DD" stroke-width="5" stroke-linecap="round"/>
+            <path d="M87 58 L94 48 L138 48" fill="none" stroke="${s}" stroke-width="10" stroke-linecap="round"/>
+            <path d="M87 58 L94 48 L138 48" fill="none" stroke="#FFC8DD" stroke-width="5" stroke-linecap="round"/>
+            <line x1="70" y1="30" x2="80" y2="64" stroke="#E06D94" stroke-width="3" stroke-dasharray="4 4"/>
+          </svg>`;
+        default:
+          return '';
+      }
+    }
+
+    /* ==========================================================================
+       CIRCUIT BOARD WIRE PATHS (1100 x 620 coordinate space)
+       ========================================================================== */
+    function renderCircuitWires(layout, isComplete) {
+      const wireBase = '#5F5973';
+      const wireInner = '#D9A05B';
+      const flowClass = isComplete ? 'wire-current-flow' : '';
+
+      let pathD = '';
+      let extraNodes = '';
+
+      if (layout === 'loop') {
+        pathD = 'M 180 237 L 180 115 L 432 115 M 668 115 L 920 115 L 920 237 M 920 383 L 920 505 L 668 505 M 432 505 L 180 505 L 180 383';
+      } else if (layout === 'parallel_voltmeter') {
+        pathD = [
+          'M 180 237 L 180 115 L 670 115 L 670 237',
+          'M 670 383 L 670 505 L 568 505',
+          'M 332 505 L 180 505 L 180 383',
+          // Parallel voltmeter branch across the bulb
+          'M 670 165 L 945 165 L 945 237',
+          'M 945 383 L 945 455 L 670 455'
+        ].join(' ');
+        extraNodes = `
+          <circle cx="670" cy="165" r="8" fill="#4A4458" stroke="#FFFFFF" stroke-width="3"/>
+          <circle cx="670" cy="455" r="8" fill="#4A4458" stroke="#FFFFFF" stroke-width="3"/>
+          <text x="650" y="156" text-anchor="end" font-family="Nunito" font-size="16" font-weight="800" fill="#7D7491">uzol</text>
+          <text x="650" y="472" text-anchor="end" font-family="Nunito" font-size="16" font-weight="800" fill="#7D7491">uzol</text>
+        `;
+      } else if (layout === 'parallel_bulbs') {
+        pathD = [
+          'M 170 237 L 170 115 L 920 115 L 920 237',
+          'M 610 115 L 610 237',
+          'M 610 383 L 610 505',
+          'M 920 383 L 920 505 L 498 505',
+          'M 262 505 L 170 505 L 170 383'
+        ].join(' ');
+        extraNodes = `
+          <circle cx="610" cy="115" r="8" fill="#4A4458" stroke="#FFFFFF" stroke-width="3"/>
+          <circle cx="610" cy="505" r="8" fill="#4A4458" stroke="#FFFFFF" stroke-width="3"/>
+        `;
+      }
+
+      // Subtle dot grid pattern in SVG
+      let dots = '';
+      for (let gx = 40; gx <= 1060; gx += 45) {
+        for (let gy = 40; gy <= 580; gy += 45) {
+          dots += `<circle cx="${gx}" cy="${gy}" r="2.2" fill="#BDE0FE" opacity="0.55"/>`;
+        }
+      }
+
+      return `
+        <g>${dots}</g>
+        <path d="${pathD}" fill="none" stroke="${wireBase}" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="${pathD}" fill="none" stroke="${wireInner}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+        ${isComplete ? `<path d="${pathD}" fill="none" stroke="#FFF1A8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" class="${flowClass}" />` : ''}
+        ${extraNodes}
+      `;
+    }
+
+    /* ==========================================================================
+       GAME STATE & STAGE SCALING
+       ========================================================================== */
+    const state = {
+      rounds: [],
+      currentRoundIndex: 0,
+      placedBySlot: {},       // slotId -> partObj
+      wrongSlotsAttempted: new Set(),
+      eliminatedPartIds: new Set(),
+      firstTryCorrect: 0,
+      totalSlots: 0,
+      selectedPartId: null,
+      selectedSlotId: null,
+      roundSolved: false,
+      drag: null
+    };
+
+    const stageEl = document.getElementById('stage');
+    const screenStart = document.getElementById('screen-start');
+    const screenGame = document.getElementById('screen-game');
+    const screenEnd = document.getElementById('screen-end');
+
+    function updateStageScale() {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const scale = Math.min(vw / 1890, vh / 1063);
+      stageEl.style.transform = `scale(${scale})`;
+    }
+    window.addEventListener('resize', updateStageScale);
+    updateStageScale();
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function showScreen(target) {
+      [screenStart, screenGame, screenEnd].forEach(sc => sc.classList.remove('active'));
+      target.classList.add('active');
+    }
+
+    /* Sound button */
+    const btnSound = document.getElementById('btn-sound');
+    btnSound.addEventListener('click', () => {
+      SoundFX.init();
+      SoundFX.muted = !SoundFX.muted;
+      if (SoundFX.muted) SoundFX.stopVoice();
+      btnSound.textContent = SoundFX.muted ? '🔇' : '🔊';
+    });
+
+    /* ==========================================================================
+       GAME FLOW
+       ========================================================================== */
+    function startNewGame() {
+      SoundFX.init();
+      SoundFX.playVoice('intro');
+      state.rounds = shuffleArray(QUESTIONS).map(q => ({
+        ...q,
+        parts: shuffleArray(q.parts)
+      }));
+      state.currentRoundIndex = 0;
+      state.firstTryCorrect = 0;
+      state.totalSlots = state.rounds.reduce((sum, r) => sum + r.slots.length, 0);
+      loadRound(0);
+      showScreen(screenGame);
+    }
+
+    function loadRound(index) {
+      state.currentRoundIndex = index;
+      state.placedBySlot = {};
+      state.wrongSlotsAttempted = new Set();
+      state.eliminatedPartIds = new Set();
+      state.selectedPartId = null;
+      state.selectedSlotId = null;
+      state.roundSolved = false;
+
+      const round = state.rounds[index];
+      document.getElementById('round-title').textContent = `${index + 1}. kolo: ${round.title}`;
+      document.getElementById('task-prompt').textContent = round.prompt;
+      document.getElementById('progress-text').textContent = `Úloha ${index + 1} / ${state.rounds.length}`;
+      document.getElementById('score-text').textContent = `Na 1. pokus: ${state.firstTryCorrect}`;
+
+      const btnNext = document.getElementById('btn-next');
+      btnNext.classList.remove('visible');
+      btnNext.textContent = index === state.rounds.length - 1 ? 'Zobraziť výsledok ➜' : 'Ďalej ➜';
+
+      setFeedback('neutral', '💡', 'Potiahni súčiastku z pravého panela na správne miesto v obvode.');
+      renderProgressDots();
+      renderCircuit();
+      renderPartsTray();
+    }
+
+    function setFeedback(type, icon, text) {
+      const banner = document.getElementById('feedback-banner');
+      banner.classList.remove('is-correct', 'is-wrong', 'is-complete');
+      if (type === 'correct') banner.classList.add('is-correct');
+      if (type === 'wrong') banner.classList.add('is-wrong');
+      if (type === 'complete') banner.classList.add('is-complete');
+      document.getElementById('feedback-icon').textContent = icon;
+      document.getElementById('feedback-text').textContent = text;
+    }
+
+    function renderProgressDots() {
+      const container = document.getElementById('progress-dots');
+      container.innerHTML = '';
+      state.rounds.forEach((_, idx) => {
+        const dot = document.createElement('div');
+        dot.className = 'p-dot';
+        if (idx < state.currentRoundIndex || (idx === state.currentRoundIndex && state.roundSolved)) {
+          dot.classList.add('done');
+        } else if (idx === state.currentRoundIndex) {
+          dot.classList.add('current');
+        }
+        container.appendChild(dot);
+      });
+    }
+
+    function renderCircuit() {
+      const round = state.rounds[state.currentRoundIndex];
+      const svgLayer = document.getElementById('circuit-svg-layer');
+      svgLayer.innerHTML = renderCircuitWires(round.layout, state.roundSolved);
+
+      const slotsLayer = document.getElementById('circuit-slots-layer');
+      slotsLayer.innerHTML = '';
+
+      round.slots.forEach((slot, idx) => {
+        const placedPart = state.placedBySlot[slot.id];
+        const el = document.createElement('div');
+        el.className = 'circuit-slot';
+        el.dataset.slotId = slot.id;
+        el.style.left = `${slot.x}px`;
+        el.style.top = `${slot.y}px`;
+
+        if (placedPart) {
+          el.classList.add('slot-filled');
+          if (state.roundSolved) el.classList.add('slot-active-power');
+          el.innerHTML = `
+            <div class="slot-filled-svg">${getComponentSVG(placedPart.svg, state.roundSolved)}</div>
+            <div class="slot-filled-name">${placedPart.name}</div>
+          `;
+        } else {
+          el.classList.add('empty');
+          if (state.selectedPartId) el.classList.add('slot-ready');
+          if (state.selectedSlotId === slot.id) el.classList.add('slot-selected-target');
+          el.innerHTML = `
+            <div class="slot-hint-num">${idx + 1}. miesto</div>
+            <div class="slot-hint-role">${slot.roleLabel}</div>
+          `;
+          el.addEventListener('click', () => handleSlotClick(slot.id));
+        }
+
+        slotsLayer.appendChild(el);
+      });
+    }
+
+    function renderPartsTray() {
+      const round = state.rounds[state.currentRoundIndex];
+      const grid = document.getElementById('parts-grid');
+      grid.innerHTML = '';
+
+      const placedIds = new Set(Object.values(state.placedBySlot).map(p => p.id));
+
+      round.parts.forEach(part => {
+        const isUsed = placedIds.has(part.id);
+        const isEliminated = state.eliminatedPartIds.has(part.id);
+
+        const card = document.createElement('div');
+        card.className = 'part-card';
+        card.dataset.partId = part.id;
+
+        if (isUsed) card.classList.add('used');
+        if (isEliminated) card.classList.add('eliminated');
+        if (state.selectedPartId === part.id && !isUsed) card.classList.add('selected');
+
+        card.innerHTML = `
+          ${isUsed ? '<div class="part-status-note">✓ Zapojené</div>' : ''}
+          ${isEliminated && !isUsed ? '<div class="part-status-note" style="color:#B86B84;">Nepatrí sem</div>' : ''}
+          <div class="part-symbol-badge" title="Schematická značka">${getSchematicSymbolSVG(part.symbol)}</div>
+          <div class="part-svg-box">${getComponentSVG(part.svg, false)}</div>
+          <div class="part-name">${part.name}</div>
+        `;
+
+        if (!isUsed && !state.roundSolved) {
+          attachPointerInteraction(card, part);
+        }
+
+        grid.appendChild(card);
+      });
+    }
+
+    /* ==========================================================================
+       DUAL INTERACTION: DRAG & DROP + TAP/CLICK TO PLACE
+       ========================================================================== */
+    function attachPointerInteraction(cardEl, part) {
+      cardEl.addEventListener('pointerdown', (e) => {
+        if (e.button !== 0 && e.pointerType === 'mouse') return;
+        e.preventDefault();
+        SoundFX.init();
+
+        const startX = e.clientX;
+        const startY = e.clientY;
+        let dragging = false;
+        let ghostEl = null;
+
+        const moveHandler = (ev) => {
+          const dx = ev.clientX - startX;
+          const dy = ev.clientY - startY;
+
+          if (!dragging && Math.hypot(dx, dy) > 8) {
+            dragging = true;
+            state.selectedPartId = null;
+            ghostEl = document.createElement('div');
+            ghostEl.className = 'drag-ghost';
+            ghostEl.innerHTML = `
+              <div class="part-svg-box" style="width:160px;height:110px;">${getComponentSVG(part.svg, false)}</div>
+              <div class="part-name">${part.name}</div>
+            `;
+            stageEl.appendChild(ghostEl);
+          }
+
+          if (dragging && ghostEl) {
+            const stageRect = stageEl.getBoundingClientRect();
+            const scale = stageRect.width / 1890;
+            const stageX = (ev.clientX - stageRect.left) / scale;
+            const stageY = (ev.clientY - stageRect.top) / scale;
+            ghostEl.style.left = `${stageX}px`;
+            ghostEl.style.top = `${stageY}px`;
+
+            highlightHoveredSlot(ev.clientX, ev.clientY);
+          }
+        };
+
+        const upHandler = (ev) => {
+          window.removeEventListener('pointermove', moveHandler);
+          window.removeEventListener('pointerup', upHandler);
+          window.removeEventListener('pointercancel', upHandler);
+
+          if (dragging) {
+            if (ghostEl) ghostEl.remove();
+            clearSlotHovers();
+            const targetSlotId = findEmptySlotAtPoint(ev.clientX, ev.clientY);
+            if (targetSlotId) {
+              attemptPlacement(part.id, targetSlotId);
+            } else {
+              renderCircuit();
+            }
+          } else {
+            // Treated as a clean click/tap
+            handlePartTap(part.id);
+          }
+        };
+
+        window.addEventListener('pointermove', moveHandler);
+        window.addEventListener('pointerup', upHandler);
+        window.addEventListener('pointercancel', upHandler);
+      });
+    }
+
+    function findEmptySlotAtPoint(clientX, clientY) {
+      const emptySlots = document.querySelectorAll('.circuit-slot.empty');
+      for (const slotEl of emptySlots) {
+        const r = slotEl.getBoundingClientRect();
+        if (clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom) {
+          return slotEl.dataset.slotId;
+        }
+      }
+      return null;
+    }
+
+    function highlightHoveredSlot(clientX, clientY) {
+      const emptySlots = document.querySelectorAll('.circuit-slot.empty');
+      emptySlots.forEach(slotEl => {
+        const r = slotEl.getBoundingClientRect();
+        const inside = clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom;
+        slotEl.classList.toggle('slot-hover', inside);
+      });
+    }
+
+    function clearSlotHovers() {
+      document.querySelectorAll('.circuit-slot.slot-hover').forEach(el => el.classList.remove('slot-hover'));
+    }
+
+    function handlePartTap(partId) {
+      if (state.roundSolved) return;
+      if (state.selectedSlotId) {
+        const slotId = state.selectedSlotId;
+        state.selectedSlotId = null;
+        attemptPlacement(partId, slotId);
+        return;
+      }
+      state.selectedPartId = state.selectedPartId === partId ? null : partId;
+      renderPartsTray();
+      renderCircuit();
+    }
+
+    function handleSlotClick(slotId) {
+      if (state.roundSolved) return;
+      SoundFX.init();
+      if (state.selectedPartId) {
+        const partId = state.selectedPartId;
+        state.selectedPartId = null;
+        attemptPlacement(partId, slotId);
+      } else {
+        state.selectedSlotId = state.selectedSlotId === slotId ? null : slotId;
+        renderCircuit();
+      }
+    }
+
+    /* ==========================================================================
+       VALIDATION & GENTLE FEEDBACK
+       ========================================================================== */
+    function attemptPlacement(partId, slotId) {
+      const round = state.rounds[state.currentRoundIndex];
+      const slot = round.slots.find(s => s.id === slotId);
+      const part = round.parts.find(p => p.id === partId);
+      if (!slot || !part || state.placedBySlot[slotId]) return;
+
+      const isMatch = slot.correctPartId === part.id || (slot.acceptGroup && part.group === slot.acceptGroup);
+      if (isMatch) {
+        // Correct placement!
+        state.placedBySlot[slotId] = part;
+        state.selectedPartId = null;
+        state.selectedSlotId = null;
+
+        if (!state.wrongSlotsAttempted.has(slotId)) {
+          state.firstTryCorrect++;
+          document.getElementById('score-text').textContent = `Na 1. pokus: ${state.firstTryCorrect}`;
+        }
+
+        const allSolved = round.slots.every(s => Boolean(state.placedBySlot[s.id]));
+        if (allSolved) {
+          state.roundSolved = true;
+          SoundFX.circuitComplete();
+          setFeedback('complete', '⚡', round.successNote);
+          document.getElementById('btn-next').classList.add('visible');
+          renderProgressDots();
+        } else {
+          SoundFX.correct();
+          setFeedback('correct', '✅', part.okNote);
+        }
+
+        renderCircuit();
+        renderPartsTray();
+      } else {
+        // Gentle wrong feedback (never harsh)
+        SoundFX.wrong();
+        state.wrongSlotsAttempted.add(slotId);
+        state.selectedPartId = null;
+        state.selectedSlotId = null;
+
+        // Check whether this part is a distractor (doesn't belong anywhere) or belongs in another slot
+        const correctSlotForPart = round.slots.find(s => s.correctPartId === part.id);
+        let hintMsg = '';
+
+        if (!correctSlotForPart) {
+          state.eliminatedPartIds.add(part.id);
+          hintMsg = `${part.wrongNote || 'Táto súčiastka do tohto obvodu nepatrí.'} Skús vybrať inú súčiastku pre miesto „${slot.roleLabel}“.`;
+        } else {
+          hintMsg = `Súčiastka „${part.name}“ patrí v tomto obvode na miesto „${correctSlotForPart.roleLabel}“, nie na „${slot.roleLabel}“.`;
+        }
+
+        setFeedback('wrong', '💬', hintMsg);
+        renderCircuit();
+        renderPartsTray();
+
+        // Trigger gentle visual shake on the target slot and card
+        const slotEl = document.querySelector(`.circuit-slot[data-slot-id="${slotId}"]`);
+        if (slotEl) {
+          slotEl.classList.add('slot-wrong');
+          setTimeout(() => slotEl.classList.remove('slot-wrong'), 450);
+        }
+        const cardEl = document.querySelector(`.part-card[data-part-id="${partId}"]`);
+        if (cardEl) {
+          cardEl.classList.add('wrong-flash');
+          setTimeout(() => cardEl.classList.remove('wrong-flash'), 450);
+        }
+      }
+    }
+
+    /* ==========================================================================
+       NAVIGATION & END SCREEN
+       ========================================================================== */
+    document.getElementById('btn-start').addEventListener('click', startNewGame);
+    document.getElementById('btn-restart').addEventListener('click', startNewGame);
+
+    document.getElementById('btn-next').addEventListener('click', () => {
+      SoundFX.init();
+      if (state.currentRoundIndex + 1 < state.rounds.length) {
+        loadRound(state.currentRoundIndex + 1);
+      } else {
+        finishGame();
+      }
+    });
+
+    function finishGame() {
+      const totalRounds = state.rounds.length;
+      const pct = Math.round((state.firstTryCorrect / state.totalSlots) * 100);
+      SoundFX.finished(pct);
+
+      document.getElementById('stat-circuits').textContent = `${totalRounds} / ${totalRounds}`;
+      document.getElementById('stat-first-try').textContent = `${state.firstTryCorrect} / ${state.totalSlots}`;
+      document.getElementById('stat-percent').textContent = `${pct} %`;
+
+      let title = 'Skvelá práca!';
+      let msg = 'Výborne! Všetky elektrické obvody sa ti podarilo úspešne zapojiť.';
+      if (pct >= 90) {
+        title = 'Majster elektrických obvodov!';
+        msg = 'Fantastický výsledok! Elektrické súčiastky, vodiče aj meracie prístroje ovládaš na jednotku.';
+      } else if (pct >= 70) {
+        title = 'Výborný výkon!';
+        msg = 'Veľmi pekne si poskladal všetky obvody. Stačí už len doladiť zopár detailov a budeš expert.';
+      } else {
+        title = 'Obvody sú hotové!';
+        msg = 'Super snaha! Každý obvod nakoniec fungoval. Skús si hru zahrať ešte raz a prekonaj svoje skóre.';
+      }
+
+      document.getElementById('end-title').textContent = title;
+      document.getElementById('end-message').textContent = msg;
+      showScreen(screenEnd);
+    }
+  </script>
+</body>
+</html>
